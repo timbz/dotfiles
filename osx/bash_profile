@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+# Some aliases 
+alias ls='ls -GFh'
+alias ll='ls -l'
+
+# Prevent file overwrite on stdout redirection
+# Use `>|` to force redirection to an existing file
+set -o noclobber
+
+# Enable history expansion with space
+# E.g. typing !!<space> will replace the !! with your last command
+bind Space:magic-space
+
+# Turn on recursive globbing (enables ** to recurse all directories)
+shopt -s globstar 2> /dev/null
+
+# Case-insensitive globbing (used in pathname expansion)
+shopt -s nocaseglob
+
+# Perform file completion in a case insensitive fashion
+bind "set completion-ignore-case on"
+
+# Append to the history file, don't overwrite it
+shopt -s histappend
+
+# Colorful prompt
+function __prompt_command () {
+  local   EXIT="$?"
+  local BRANCH="$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/')"
+  local    RED="\[\e[31m\]"
+  local  GREEN="\[\e[32m\]"
+  local YELLOW="\[\e[33m\]"
+  local   BLUE="\[\e[34m\]"
+  local PURPLE="\[\e[35m\]"
+  local   CYAN="\[\e[36m\]"
+  local   GRAY="\[\e[37m\]"
+  local  CLEAR="\[\e[0m\]"
+  PS1="$CYAN\u$CLEAR@$GREEN\h$CLEAR:$YELLOW\w$PURPLE$BRANCH"
+  if [ $EXIT != 0 ]; then
+    PS1+=" $RED$EXIT"
+  fi
+  PROMPT_DIRTRIM=3
+  PS1+=" $CLEAR$ "
+}
+PROMPT_COMMAND=__prompt_command
+
+# Bash completion
+export BASH_COMPLETION_COMPAT_DIR="/usr/local/etc/bash_completion.d"
+[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
+
+export PATH="$HOME/.cargo/bin:$PATH"
+export PATH="/usr/local/sbin:$PATH"
